@@ -6,32 +6,39 @@
         <title>To-do list app</title>
     </head>
     <body>
-        <h1> Welcome to the to-do list app!</h1>
+        <main id="app">
+            <nav id="navbar">
+                <h1>2DO</h1>
+                <button id="logout-btn" style="margin-left: auto;">Logout</button>
+                <button id="about-btn">About</button>
+                <button id="profile-btn">Profile</button>
+            </nav>
 
-        <div>
-            <h3> Add a new task</h3>
-            <input type="text" id="new-task-input" placeholder="write the new task here">
-            <button id="add-task-button"> Add todo</button>
-        </div>
-
-        <div>
-            <div style="display: flex;">
-                <h3>Tasks:</h3>
-                <select required style="margin: 20px;">
-                    <option value="" disabled selected hidden> Select a filter </option>
-                    <option>Done</option>
-                    <option>Todo</option>
-                    <option>archived</option>
-                    <option>shared task</option>
-
-                </select>
-            </div>
             <div>
-                <ul id="todo-list">
+                <h3> Add a new task</h3>
+                <input type="text" id="new-task-input" placeholder="write the new task here">
+                <button id="add-task-button"> Add todo</button>
+            </div>
 
-                </ul>
-            </div>        
-        </div>
+            <div>
+                <div style="display: flex;">
+                    <h3>Tasks:</h3>
+                    <select id="list-filter-select" required style="margin: 20px;">
+                        <option value="" disabled selected hidden> Select a filter </option>
+                        <option value="done">Done</option>
+                        <option value="todo">Todo</option>
+                        <option value="archived">archived</option>
+                        <option value="shared">shared task</option>
+
+                    </select>
+                </div>
+                <div>
+                    <ul id="todo-list">
+
+                    </ul>
+                </div>        
+            </div>
+        </main>    
 
         <script src="app.js"></script>
     </body>
