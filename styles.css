@@ -9,3 +9,9 @@ li {
     display: flex;
     width: fit-content;
 }
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 2%;
+}
