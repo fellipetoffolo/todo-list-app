@@ -21,7 +21,7 @@ function renderList(todos) {
         const deleteButton = document.createElement("button");
         deleteButton.textContent = "Delete";
         deleteButton.classList.add("task-delete-btn");          // Adds a class to make the delete butons searchable (for deleting).
-        listItem.appendChild(spanElement)
+        listItem.appendChild(spanElement);
         listItem.appendChild(deleteButton);
 
         listElement.appendChild(listItem);
@@ -59,3 +59,42 @@ buttonElement.addEventListener("click", (event) => {
         renderList(todos);
     }
 })
+
+
+// ***TODO: Implement filtering logic for when the task structure is more complex.
+const selectElement = document.getElementById("list-filter-select");
+
+selectElement.addEventListener("change", (event) => {
+    const selectedValue = event.target.value;
+    console.log(selectedValue);
+})
+
+
+// Routing logic for rendering other page's html content without reloading anything
+const routes = {
+    "logout-btn": "login",
+    "about-btn": "about",
+    "profile-btn": "profile"
+}
+
+function loadRoute() {
+    const route = location.hash.slice(1);
+    fetch(`views/${route}.html`)
+        .then(response => response.text())
+        .then(html => {
+            app.innerHTML = html;
+        })
+        .catch(() => {
+            app.innerHTML= "<h2> The page couldn't be found :( </h2>"
+        })
+}
+
+window.addEventListener("hashchange", loadRoute);
+
+const navElement = document.getElementById("navbar")
+
+navElement.addEventListener("click", (event) => {
+    const route = routes[event.target.id];
+    if (route) location.hash = `#${route}`;
+});
+
