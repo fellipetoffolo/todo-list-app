@@ -5,6 +5,24 @@
         <link rel="stylesheet" href="styles.css">
         <title>To-do list app</title>
     </head>
+
+    <div id="task-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modal-title">New task</h2>
+            <form id="task-form">
+                <input type="text" id="task-name" placeholder="Name" required>
+                <select id="task-status">
+                    <option value="todo">Todo</option>
+                    <option value="doing">Doing</option>
+                    <option value="done">Done</option>
+                </select>
+                <input type="date" id="task-deadline">
+                <button type="submit">Salvar</button>
+                <button type="button" id="cancel-btn">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
     <body>
         <main id="app">
             <nav id="navbar">
@@ -16,7 +34,7 @@
 
             <div>
                 <h3> Add a new task</h3>
-                <input type="text" id="new-task-input" placeholder="write the new task here">
+
                 <button id="add-task-button"> Add todo</button>
             </div>
 
@@ -24,18 +42,28 @@
                 <div style="display: flex;">
                     <h3>Tasks:</h3>
                     <select id="list-filter-select" required style="margin: 20px;">
-                        <option value="" disabled selected hidden> Select a filter </option>
+                        <option value="" disabled selected hidden> all </option>
                         <option value="done">Done</option>
                         <option value="todo">Todo</option>
-                        <option value="archived">archived</option>
-                        <option value="shared">shared task</option>
+                        <option value="doing">Doing</option>
 
                     </select>
                 </div>
                 <div>
-                    <ul id="todo-list">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th> Name </th> 
+                                <th> Creation date</th>
+                                <th> Deadline</th>
+                                <th> Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todo-table">
+                            
+                        </tbody>
 
-                    </ul>
+                    </table>
                 </div>        
             </div>
         </main>    
