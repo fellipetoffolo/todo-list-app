@@ -1,81 +1,165 @@
-// Placeholder values for testing when no database
+// ======================= DATA AND CONSTANTS =======================
+const STATUS = {
+    TODO: "todo",
+    DOING: "doing",
+    DONE: "done"
+};
+
+const date = new Date();
+const creation_date = date.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+});
+
 const todos = [
-    "Passear com o cachorro",
-    "Limpar a casa",
-    "Lavar o carro"
+    { name: "Passear com o cachorro", creation_date: creation_date, deadline: "12/06/2025", status: STATUS.TODO },
+    { name: "Limpar a casa", creation_date: creation_date, deadline: "25/03/2025", status: STATUS.TODO },
+    { name: "Lavar o carro", creation_date: creation_date, deadline: "20/03/2003", status: STATUS.TODO }
 ];
 
-// Retrieves the task list from the DOM
-const listElement = document.getElementById("todo-list");
+let currentEditingTask = null;
 
-// Recieves a list and renders it on the page. Accepts parameter for reusability when filtering the content.
-function renderList(todos) {
-    
-    listElement.innerHTML = "";
-    
+// ======================= DOM ELEMENT REFERENCES =======================
+const tableElement = document.getElementById("todo-table");
+const modal = document.getElementById("task-modal");
+const form = document.getElementById("task-form");
+const nameInput = document.getElementById("task-name");
+const statusSelect = document.getElementById("task-status");
+const deadlineInput = document.getElementById("task-deadline");
+const cancelBtn = document.getElementById("cancel-btn");
+const selectElement = document.getElementById("list-filter-select");
+const navElement = document.getElementById("navbar");
+
+// ======================= RENDERING FUNCTION =======================
+function renderTable(todos) {
+    tableElement.innerHTML = "";
+
     todos.forEach(task => {
-        const listItem = document.createElement("li");
-        const spanElement = document.createElement("span");     // Creates a span, because otherwise the click event would text-decorate the delete button alongside the todo text.
-        spanElement.textContent = task;
+        const tableRowElement = document.createElement("tr");
 
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Delete";
-        deleteButton.classList.add("task-delete-btn");          // Adds a class to make the delete butons searchable (for deleting).
-        listItem.appendChild(spanElement);
-        listItem.appendChild(deleteButton);
+        Object.values(task).forEach(field => {
+            const tableDataElement = document.createElement("td");
+            tableDataElement.textContent = field;
+            tableRowElement.appendChild(tableDataElement);
+        });
 
-        listElement.appendChild(listItem);
-    })
+        const buttonTableCell = document.createElement("td");
+
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit task";
+        editBtn.classList.add("task-edit-btn");
+        editBtn.task = task;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.id = "task-delete-btn";
+        deleteBtn.task = task;
+
+        buttonTableCell.appendChild(editBtn);
+        buttonTableCell.appendChild(deleteBtn);
+
+        tableRowElement.appendChild(buttonTableCell);
+        tableElement.appendChild(tableRowElement);
+    });
 }
 
-renderList(todos);  // Displays the list when the page first loads.
+renderTable(todos); // Initial rendering
 
-// Event listener for marking the tasks as done.
-listElement.addEventListener("click", (event) => {
-    if(event.target.tagName === "SPAN") {           // Checks if the target element is a Span tag.
-        console.log(event);
-        event.target.classList.toggle("completed"); // Toggles the "completed" CSS class, text-decorating with line-through.
-        return ;    // Make it so that the second condition is not checked, as it is not needed.
+// ======================= TABLE EVENT HANDLING =======================
+tableElement.addEventListener("click", (event) => {
+    const target = event.target;
+
+    if (target.tagName === "TD") {
+        const tr = target.closest("tr");
+        tr.classList.toggle("done");
     }
 
-    if(event.target.classList.contains("task-delete-btn")) {
-        const li = event.target.parentElement;
-        li.remove();
-        
-        const index = Array.from(listElement.children).indexOf(li);
-        todos.splice(index, 1);
+    if (target.id === "task-delete-btn") {
+        const task = target.task; // referência direta
+        const index = todos.indexOf(task);
+
+        if (index !== -1) {
+            todos.splice(index, 1);
+            renderTable(todos);
+        }
+
+        return;
     }
-})
 
-const inputElement = document.getElementById("new-task-input");
-const buttonElement = document.getElementById("add-task-button");
 
-// Event listener for adding a new task and re-rendering the list.
-buttonElement.addEventListener("click", (event) => {
-    const newTask = inputElement.value.trim();
-    if(newTask){
+    if (target.classList.contains("task-edit-btn")) {
+        const task = target.task;
+
+        currentEditingTask = task;
+
+        nameInput.value = task.name;
+        deadlineInput.value = task.deadline;
+        statusSelect.value = task.status;
+        modal.classList.remove("hidden");
+    }
+});
+
+// ======================= FORM EVENT HANDLING =======================
+document.getElementById("add-task-button").addEventListener("click", () => {
+    modal.classList.remove("hidden");
+    form.dataset.editing = "";
+    form.reset();
+});
+
+cancelBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+});
+
+form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const name = nameInput.value.trim();
+    const status = statusSelect.value;
+    const deadline = deadlineInput.value;
+
+    if (!name) return alert("O nome da tarefa não pode estar vazio.");
+
+    const newTask = {
+        name,
+        creation_date,
+        deadline,
+        status
+    };
+
+    if (currentEditingTask) {
+        Object.assign(currentEditingTask, newTask);
+    } else {
         todos.push(newTask);
-        inputElement.value = "";
-        renderList(todos);
     }
-})
 
+    currentEditingTask = null;
+    form.reset();
+    modal.classList.add("hidden");
+    renderTable(todos);
+});
 
-// ***TODO: Implement filtering logic for when the task structure is more complex.
-const selectElement = document.getElementById("list-filter-select");
-
+// ======================= FILTER SELECT EVENT =======================
 selectElement.addEventListener("change", (event) => {
     const selectedValue = event.target.value;
-    console.log(selectedValue);
-})
 
+    let filteredList = [];
 
-// Routing logic for rendering other page's html content without reloading anything
+    if (selectedValue === "") {
+        filteredList = todos;
+    } else {
+        filteredList = todos.filter(task => task.status === selectedValue);
+    }
+
+    renderTable(filteredList);
+});
+
+// ======================= PAGE ROUTING =======================
 const routes = {
     "logout-btn": "login",
     "about-btn": "about",
     "profile-btn": "profile"
-}
+};
 
 function loadRoute() {
     const route = location.hash.slice(1);
@@ -85,16 +169,13 @@ function loadRoute() {
             app.innerHTML = html;
         })
         .catch(() => {
-            app.innerHTML= "<h2> The page couldn't be found :( </h2>"
-        })
+            app.innerHTML = "<h2> The page couldn't be found :( </h2>";
+        });
 }
 
 window.addEventListener("hashchange", loadRoute);
-
-const navElement = document.getElementById("navbar")
 
 navElement.addEventListener("click", (event) => {
     const route = routes[event.target.id];
     if (route) location.hash = `#${route}`;
 });
-
